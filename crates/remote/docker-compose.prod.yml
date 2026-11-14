@@ -74,28 +74,28 @@ services:
       retries: 10
       start_period: 10s
 
-    relay-server:
-      build:
-        context: ../..
-        dockerfile: crates/relay-tunnel/Dockerfile
-      restart: unless-stopped
-      expose:
-        - "8082"
-      depends_on:
-        remote-db:
-          condition: service_healthy
-      environment:
-        RUST_LOG: info
-        SERVER_DATABASE_URL: postgres://remote:${DB_PASSWORD:-remote}@remote-db:5432/remote
-        RELAY_LISTEN_ADDR: 0.0.0.0:8082
-        VIBEKANBAN_REMOTE_JWT_SECRET: ${VIBEKANBAN_REMOTE_JWT_SECRET}
-      labels:
-        # wildcard hostnames -> relay-server (TLS terminated at Cloudflare edge)
-        - "traefik.http.routers.relay-wild.rule=HostRegexp(`{subdomain:[a-z0-9-]+}.relay-vibe.mohofo.shop`)"
-        - "traefik.http.routers.relay-wild.entrypoints=https"
-        - "traefik.http.routers.relay-wild.tls=true"
-        - "traefik.http.routers.relay-wild.service=relay-svc"
-        - "traefik.http.services.relay-svc.loadbalancer.server.port=8082"
+  relay-server:
+    build:
+      context: ../..
+      dockerfile: crates/relay-tunnel/Dockerfile
+    restart: unless-stopped
+    expose:
+      - "8082"
+    depends_on:
+      remote-db:
+        condition: service_healthy
+    environment:
+      RUST_LOG: info
+      SERVER_DATABASE_URL: postgres://remote:${DB_PASSWORD:-remote}@remote-db:5432/remote
+      RELAY_LISTEN_ADDR: 0.0.0.0:8082
+      VIBEKANBAN_REMOTE_JWT_SECRET: ${VIBEKANBAN_REMOTE_JWT_SECRET}
+    labels:
+      # wildcard hostnames -> relay-server (TLS terminated at Cloudflare edge)
+      - "traefik.http.routers.relay-wild.rule=HostRegexp(`{subdomain:[a-z0-9-]+}.relay-vibe.mohofo.shop`)"
+      - "traefik.http.routers.relay-wild.entrypoints=https"
+      - "traefik.http.routers.relay-wild.tls=true"
+      - "traefik.http.routers.relay-wild.service=relay-svc"
+      - "traefik.http.services.relay-svc.loadbalancer.server.port=8082"
 
 volumes:
   remote-db-data:
